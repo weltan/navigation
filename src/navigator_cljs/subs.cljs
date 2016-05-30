@@ -28,3 +28,9 @@
         (get-in @db [:nav
                      :children
                      @index])))))
+
+(register-sub
+  :messages
+  (fn [db _]
+    (reaction
+      (get @db :messages))))

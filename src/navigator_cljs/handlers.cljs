@@ -2,7 +2,8 @@
   (:require
     [re-frame.core :refer [register-handler after]]
     [schema.core :as s :include-macros true]
-    [navigator-cljs.db :refer [app-db schema]]))
+    [navigator-cljs.db :refer [app-db schema]]
+    [clojure.walk :as cw]))
 
 ;; -- Helpers
 ;; ------------------------------------------------------------
@@ -22,8 +23,8 @@
 (defn check-and-throw
   "throw an exception if db doesn't match the schema."
   [a-schema db]
-    (if-let [problems (s/check a-schema db)]
-      (throw (js/Error. (str "schema check failed: " problems)))))
+  (if-let [problems (s/check a-schema db)]
+    (throw (js/Error. (str "schema check failed: " problems)))))
 
 (def validate-schema-mw
   (after (partial check-and-throw schema)))
@@ -42,21 +43,30 @@
   validate-schema-mw
   (fn [db [_ value]]
     (-> db
-        (update-in [:nav :index] inc)
-        (update-in [:nav :children] #(conj % value)))))
+      (update-in [:nav :index] inc)
+      (update-in [:nav :children] #(conj % value)))))
 
 (register-handler
   :nav/pop
   validate-schema-mw
   (fn [db [_ _]]
     (-> db
-        (update-in [:nav :index] dec-to-zero)
-        (update-in [:nav :children] pop))))
+      (update-in [:nav :index] dec-to-zero)
+      (update-in [:nav :children] pop))))
 
 (register-handler
   :nav/home
   validate-schema-mw
   (fn [db [_ _]]
     (-> db
-        (assoc-in [:nav :index] 0)
-        (assoc-in [:nav :children] (vector (get-in db [:nav :children 0]))))))
+      (assoc-in [:nav :index] 0)
+      (assoc-in [:nav :children] (vector (get-in db [:nav :children 0]))))))
+
+(register-handler
+  :chat/send
+  validate-schema-mw
+  (fn [db [_ message]]
+    (let [cljs-message (cw/keywordize-keys (js->clj message))
+          cljs-message-with-id (assoc cljs-message :uniqueId (rand-int 10000000))]
+      (-> db
+        (update-in [:messages] #(conj % cljs-message-with-id))))))
