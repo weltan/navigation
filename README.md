@@ -1,3 +1,6 @@
+# Ken's navigation example
+This was forked from vikeri's [re-navigate](https://github.com/vikeri/re-navigate). It brings you through a skeleton of react-components, using a simple (cond curren-state state1 [component1] state2 [component2]) structure. This cond inside one component may not be the right way to switch between scenes....seems to work, but may not be performant.
+
 # re-navigate
 > Example of React Native Navigation with [re-frame](https://github.com/Day8/re-frame)/[re-natal](https://github.com/drapanjanas/re-natal/)
 
